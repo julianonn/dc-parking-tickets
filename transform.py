@@ -12,8 +12,12 @@ import geopandas as gpd
 import numpy as np
 import utils
 import requests
+import pyogrio
+import shutil
+import warnings
 
 requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'ALL:@SECLEVEL=1'
+warnings.filterwarnings("ignore")
 
 
 # ============================================================================
@@ -42,6 +46,7 @@ def _read_raw_data():
         df = pd.concat([df, temp])
 
     return df.replace('', np.nan)
+
 
 # end _read_raw_data()
 
@@ -82,6 +87,8 @@ def _simple_fill(df: pd.DataFrame):
     location_map = {entry['LOCATION']: (entry['LATITUDE'], entry['LONGITUDE']) for entry in location_map}
 
     return _update_main_data_frame(location_map, df)
+
+
 # end simple_fill()
 
 # ============================================================================
@@ -144,7 +151,7 @@ def _fuzzy_fill(df: pd.DataFrame):
         matches.best_fuzzy_match EQUALS knowns.formatted_location
     """
 
-    matches = nulls[nulls['valid?'] is True]
+    matches = nulls[nulls['valid?']]
     known_dict = {row['formatted_location']: (row['LATITUDE'], row['LONGITUDE']) for _, row in knowns.iterrows()}
     matches['LATITUDE'] = matches['best_fuzzy_match'].apply(lambda x: known_dict[x][0])
     matches['LONGITUDE'] = matches['best_fuzzy_match'].apply(lambda x: known_dict[x][1])
@@ -154,8 +161,9 @@ def _fuzzy_fill(df: pd.DataFrame):
     location_map = {entry['LOCATION']: (entry['LATITUDE'], entry['LONGITUDE']) for entry in location_map}
 
     return _update_main_data_frame(location_map, df)
-# end fuzzy_fill()
 
+
+# end fuzzy_fill()
 
 
 # ============================================================================
@@ -178,6 +186,8 @@ def _update_main_data_frame(location_map: dict, df: pd.DataFrame):
 
     print("\t\tDone!")
     return df
+
+
 # end _update_main_data_frame()
 
 
@@ -200,6 +210,8 @@ def coordinates_to_geospatial(df: pd.DataFrame):
         crs="EPSG:4326"
     )
     return gdf
+
+
 # end coordinates_to_geospatial()
 
 
@@ -213,14 +225,74 @@ def shapefile_preprocessing(gdf: gpd.GeoDataFrame):
         Returns:
             gdf: geodataframe with datetime objects converted to strings
     """
-    gdf['ISSUE_DATE'] = np.vectorize(utils.date_to_str)(gdf['ISSUE_DATE'])
-    gdf['ISSUE_TIME'] = np.vectorize(utils.time_to_str)(gdf['ISSUE_TIME'])
+    gdf['ISSUE_DATE'] = np.vectorize(
+        lambda x: utils.date_to_str(x) if not pd.isna(x) else ''
+    )(gdf['ISSUE_DATE'])
+
+    gdf['ISSUE_TIME'] = np.vectorize(
+        lambda x: utils.time_to_str(x) if not pd.isna(x) else ''
+    )(gdf['ISSUE_TIME'])
 
     gdf['ISSUE_DATE'] = gdf['ISSUE_DATE'].astype(str)
     gdf['ISSUE_TIME'] = gdf['ISSUE_TIME'].astype(str)
+
+    #gdf['MULTI_OWNER_NUMBER'] = gdf['MULTI_OWNER_NUMBER'].astype(str)
+
+    keep_columns = ['OBJECTID',
+                    'ISSUE_DATE',
+                    'ISSUE_TIME',
+                    'ISSUING_AGENCY_CODE',
+                    'VIOLATION_CODE',
+                    'PLATE_STATE',
+                    'VEHICLE_TYPE',
+                    'DISPOSITION_CODE',
+                    'DISPOSITION_DATE',
+                    'FINE_AMOUNT',
+                    'TOTAL_PAID',
+                    'PENALTY_1',
+                    'PENALTY_2',
+                    'PENALTY_3',
+                    'PENALTY_4',
+                    'PENALTY_5',
+                    'LATITUDE',
+                    'LONGITUDE']
+    gdf = gdf[keep_columns]
     return gdf
+
+
 # end shapefile_preprocessing()
 
+def _write_zip(gdf: gpd.GeoDataFrame):
+    """
+        Writes the geodataframe to a zip file containing the shapefile data
+    """
+    d = os.path.dirname(os.path.abspath(__file__)) + "/data/violations_shapefile"
+    zippath = d + ".zip"
+
+    # remove old zip file and shapefile directory
+    if os.path.exists(zippath):
+        os.remove(zippath)
+    if os.path.exists(d):
+        shutil.rmtree(d)
+    if not os.path.exists(d):
+        os.mkdir(d)
+
+    # write shapefile
+    print("\t\tCreating sidecar files....", end='')
+    shppath = d + "/violations.shp"
+    # gdf.to_file(fpath, engine='pyogrio', driver='ESRI Shapefile'
+    pyogrio.write_dataframe(gdf, shppath, encoding="utf-8", driver='ESRI Shapefile')
+    print("\t\tDone!")
+
+    # zip shapefile and sidecar files
+    print("\t\tZipping....", end='')
+    shutil.make_archive(d, 'zip', d)
+    print("\t\tDone!")
+
+    # delete shapefile directory
+    shutil.rmtree(d)
+
+# enf _write_zip()
 
 # ============================================================================
 # ================================ MAIN ======================================
@@ -228,29 +300,28 @@ def shapefile_preprocessing(gdf: gpd.GeoDataFrame):
 
 def transform():
     df = _read_raw_data()
-    # df.to_csv("test-full.csv", index=False)
+    df.to_csv("test-full.csv", index=False)
     # df = pd.read_csv("test-full.csv")
 
     print("Filling null coordinates....")
     df = _simple_fill(df)
     df = _fuzzy_fill(df)
-    print("Done!")
+    print("....Done!")
 
-    print("Converting to shapefile for geospatial data....", end='')
+    print("Converting to shapefile for geospatial data....")
     gdf = coordinates_to_geospatial(df)
     gdf = shapefile_preprocessing(gdf)
-    print("Done!")
+    print("....Done!")
 
-    print("Writing to shapefile....", end='')
-    fp = os.path.dirname(os.path.abspath(__file__)) + "/data/violations_shapefile/violations.shp"
-    gdf.to_file(fp)
-    print("Done!")
+    print("Writing to shapefile....")
+    _write_zip(gdf)
+    print("....Done!")
 
     return df
+
+
 # end transform()
 
 
 if __name__ == "__main__":
     transform()
-
-

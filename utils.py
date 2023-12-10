@@ -91,7 +91,7 @@ def fetch_file_urls():
 
 def url_to_df(url: str):
     """
-        Reads in a csv file from a url and returns a dataframe
+        Reads in a csv file from url and returns a dataframe
 
         Parameters:
             url: url for the raw csv file
@@ -138,7 +138,7 @@ def date_to_str(elem):
     """
     if isinstance(elem, (pd.Timestamp, dt.date, dt.datetime, dt.time)):
         return elem.strftime("%Y-%m-%d")
-    return elem
+    return str(elem)
 
 
 def time_to_str(elem):
@@ -152,7 +152,7 @@ def time_to_str(elem):
     """
     if isinstance(elem, (pd.Timestamp, dt.date, dt.datetime, dt.time)):
         return elem.strftime("%H:%M:%S")
-    return elem
+    return str(elem)
 
 
 # ============================================================================
@@ -163,11 +163,11 @@ def link_lat_long(location_map: dict, index: int, loc: str, lat_long: str):
         function called by df.apply in transform.py
     """
     if loc in null_vals:
-        return ''
+        return lat_long
     if loc in location_map:
         if pd.isna(lat_long):
             return location_map[loc][index]
-    return loc
+    return lat_long
 
 
 # ============================================================================
@@ -227,7 +227,7 @@ def validate_fuzzy_match(unknown: str, match: str):
 def get_best_fuzzy_match(possible_matches: set, query: str):
     """ applied vectorized to the dataframe """
     tup = process.extractOne(
-        query, possible_matches, scorer=fuzz.WRatio
+        query, possible_matches, scorer=fuzz.ratio, processor=None
     )  # (match, score, index?)
 
     return tup[0]  # best match
