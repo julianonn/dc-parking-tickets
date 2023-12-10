@@ -1,5 +1,7 @@
 # Geospatial Analysis of DC Parking Violations (2021-2023)
 
+&nbsp;
+&nbsp;
 
 
 ## Project Description
@@ -22,7 +24,8 @@ city. Related questions that interest me include:
 Once I wrangle some pre-2021 data, I'd also like to explore:
 * How has parking enforcement varied with changes in urban economic activity due the COVID-19 pandemic?
 
-
+&nbsp;
+&nbsp;
 
 ## Data Sources
 
@@ -55,7 +58,8 @@ Data retrieved from US Census Bureau under the public domain.
 Includes 1 [Shapefile](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) of 
 2022 DC census tracts.
 
-
+&nbsp;
+&nbsp;
 
 ## Instructions for generating violation shapefile
 This already exists in the repo as `data/violations_shapefile.zip`, but if you want to regenerate it, follow these steps:
