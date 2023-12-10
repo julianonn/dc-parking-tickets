@@ -19,7 +19,7 @@ city. Related questions that interest me include:
 * How does parking enforcement vary by time of day, day of week, or month of year? Volume of traffic? 
   Proximity to schools and public transportation hubs?
 
-Once I wrangle some pre-2021, I'd also like to explore:
+Once I wrangle some pre-2021 data, I'd also like to explore:
 * How has parking enforcement varied with changes in urban economic activity due the COVID-19 pandemic?
 
 
