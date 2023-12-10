@@ -228,8 +228,8 @@ def shapefile_preprocessing(gdf: gpd.GeoDataFrame):
 
 def transform():
     df = _read_raw_data()
-    df.to_csv("test-full.csv", index=False)
-    # df = pd.read_csv("test-full.csv", dtype=str)
+    # df.to_csv("test-full.csv", index=False)
+    # df = pd.read_csv("test-full.csv")
 
     print("Filling null coordinates....")
     df = _simple_fill(df)
