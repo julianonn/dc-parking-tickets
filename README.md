@@ -1,10 +1,10 @@
-# Geospatial Analysis of DC Parking Violations (2021-2023)
+# 🌎 Geospatial Analysis of DC Parking Violations (2021-2023)
 
 &nbsp;
 &nbsp;
 
 
-## Project Description
+## ⭐️ Project Description
 
 This repo contains the datasets and preprocessing/transformation code for a Tableau geospatial analysis of parking 
 violations in Washington, DC from 2021 to 2023.
@@ -27,7 +27,7 @@ Once I wrangle some pre-2021 data, I'd also like to explore:
 &nbsp;
 &nbsp;
 
-## Data Sources
+## ⭐️ Data Sources
 
 ### _DC Parking Violations_
 
@@ -61,7 +61,7 @@ Includes 1 [Shapefile](https://www.census.gov/geographies/mapping-files/time-ser
 &nbsp;
 &nbsp;
 
-## Instructions for generating violation shapefile
+## ⭐️ Instructions for generating violation shapefile
 This already exists in the repo as `data/violations_shapefile.zip`, but if you want to regenerate it, follow these steps:
 
 1. Install [Python 3.10.0](https://www.python.org/downloads/) or later.
