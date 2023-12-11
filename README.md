@@ -4,6 +4,13 @@
 &nbsp;
 
 
+>[!TIP]
+> Check out the 1st version of the EDA viz on [Tableau Public](https://public.tableau.com/app/profile/julia.nonn/viz/dc-parking-tickets/GeospatialDCParking) !
+>
+
+&nbsp;
+&nbsp;
+
 ## ⭐ Project Description
 
 This repo contains the datasets and preprocessing/transformation code for a Tableau geospatial analysis of parking 
